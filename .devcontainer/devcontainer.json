@@ -1,0 +1,57 @@
+{
+  "name": "fastapi-htmx-todo",
+  "dockerComposeFile": [
+    "docker-compose.yml"
+  ],
+  //"forwardPorts": [
+  //  8000
+  //],
+  "customizations": {
+    // Configure properties specific to VS Code.
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "files.eol": "\n",
+        "editor.formatOnSave": true,
+        "editor.formatOnSaveMode": "file",
+        "git.rebaseWhenSync": true,
+        "remote.restoreForwardedPorts": false,
+        "remote.autoForwardPorts": false,
+        "typescript.preferences.quoteStyle": "single"
+      },
+      "extensions": [
+        "PKief.material-icon-theme",
+        "ms-python.python",
+        "anweber.vscode-httpyac",
+        "asciidoctor.asciidoctor-vscode",
+        "GitHub.vscode-github-actions",
+        "ritwickdey.LiveServer",
+        "qwtel.sqlite-viewer",
+        "ms-azuretools.vscode-docker",
+        "ms-vscode.makefile-tools",
+        "GitHub.copilot-chat",
+        "cweijan.vscode-myssql-client2",
+        "redhat.vscode-xml"
+      ]
+    }
+  },
+  // this is python 
+  //"service": "fastapi-htmx-todo",
+  // obviously java 
+  "service": "fastapi-htmx-todo",
+  "workspaceFolder": "/src",
+  "remoteUser": "vscode",
+  "postCreateCommand": "", //"pip install -r requirements.in && pip install xq",
+  "postStartCommand": "pip install -r requirements.txt && make dev", //"make dev && ptw main.py test_*.py",
+  "shutdownAction": "stopCompose",
+  /*
+  "features": {
+    // Allow the devcontainer to run host docker commands, see https://github.com/devcontainers/templates/tree/main/src/docker-outside-of-docker
+    // from https://stackoverflow.com/questions/61696029/docker-in-docker-setup-with-vscode-dev-containers-how-to-access-running-docker
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+    "ghcr.io/devcontainers-extra/features/maven-sdkman:2": {
+      "jdkVersion": "17"
+    }
+  }
+    */
+}

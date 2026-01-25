@@ -1,0 +1,23 @@
+services:
+  fastapi-htmx-todo:
+    env_file:
+      - .env
+    build:
+      context: .
+    working_dir: /src
+    volumes:
+      - ..:/src:cached
+    command: >
+      bash -c "sleep infinity"
+    ports:
+      #- "${app_port}:8000"
+      - "8000:8000"
+
+    networks:
+      fastapi-htmx-todo-net:
+
+
+networks:
+  fastapi-htmx-todo-net:
+
+
