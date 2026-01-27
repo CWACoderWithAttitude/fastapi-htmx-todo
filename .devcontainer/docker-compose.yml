@@ -1,4 +1,18 @@
 services:
+  playwright:
+
+    build:
+      context: .
+      dockerfile: Dockerfile.playwright
+    working_dir: /src
+    volumes:
+      - ..:/src:cached
+    command: >
+      bash -c "sleep infinity"
+    networks:
+      fastapi-htmx-todo-net:
+    depends_on:
+      - fastapi-htmx-todo
   fastapi-htmx-todo:
     env_file:
       - .env

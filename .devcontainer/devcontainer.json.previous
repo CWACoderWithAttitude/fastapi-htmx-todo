@@ -36,13 +36,13 @@
     }
   },
   // this is python 
+  "service": "playwright",
   //"service": "fastapi-htmx-todo",
-  // obviously java 
-  "service": "fastapi-htmx-todo",
   "workspaceFolder": "/src",
   "remoteUser": "vscode",
-  "postCreateCommand": "", //"pip install -r requirements.in && pip install xq",
-  "postStartCommand": "pip install -r requirements.txt && make dev", //"make dev && ptw main.py test_*.py",
+  //"postCreateCommand": "npx playwright install --with-deps --only-shell", //"pip install -r requirements.in && pip install xq",
+  "postCreateCommand": "npx playwright install --only-shell", //"pip install -r requirements.in && pip install xq",
+  //"postStartCommand": "pip install -r requirements.txt && make dev", //"make dev && ptw main.py test_*.py",
   "shutdownAction": "stopCompose",
   /*
   "features": {

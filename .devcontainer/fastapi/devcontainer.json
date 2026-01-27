@@ -1,0 +1,39 @@
+{
+    "name": "fastapi-htmx-todo",
+    "dockerComposeFile": [
+        "../docker-compose.yml"
+    ],
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "zsh",
+                "files.eol": "\n",
+                "editor.formatOnSave": true,
+                "editor.formatOnSaveMode": "file",
+                "git.rebaseWhenSync": true,
+                "remote.restoreForwardedPorts": false,
+                "remote.autoForwardPorts": false,
+                "typescript.preferences.quoteStyle": "single"
+            },
+            "extensions": [
+                "PKief.material-icon-theme",
+                "ms-python.python",
+                "anweber.vscode-httpyac",
+                "asciidoctor.asciidoctor-vscode",
+                "GitHub.vscode-github-actions",
+                "ritwickdey.LiveServer",
+                "qwtel.sqlite-viewer",
+                "ms-azuretools.vscode-docker",
+                "ms-vscode.makefile-tools",
+                "GitHub.copilot-chat",
+                "cweijan.vscode-myssql-client2",
+                "redhat.vscode-xml"
+            ]
+        }
+    },
+    "service": "fastapi-htmx-todo",
+    "workspaceFolder": "/src",
+    "remoteUser": "vscode",
+    "postStartCommand": "pip install -r requirements.txt && make dev",
+    "shutdownAction": "stopCompose"
+}

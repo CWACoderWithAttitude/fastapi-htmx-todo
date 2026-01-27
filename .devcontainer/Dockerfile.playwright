@@ -1,0 +1,31 @@
+FROM mcr.microsoft.com/playwright:v1.50.0-noble
+RUN apt-get update 
+RUN apt-get update && apt-get install -y \
+    libnss3 \
+    libxss1 \
+    libgbm-dev \
+    libgtk-3-0 \
+    libx11-xcb1 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    libpangocairo-1.0-0 \
+    libcups2 \
+    libdrm2 \
+    libatspi2.0-0 \
+    libxcb-dri3-0 \
+    libxcb-dri2-0 \
+    libxcb-glx0 \
+    libxcb-shape0 \
+    libxcb-xfixes0 \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0
+
+RUN useradd -m vscode
+USER vscode
+CMD ["bash"]
+# https://playwright.dev/docs/browsers#chromium-headless-shell
+#RUN npx playwright install --with-deps --only-shell
+#RUN playwright install --with-deps --only-shell chromium
+#RUN npm install -g npm@11.8.0
+#RUN npm install playwright 
