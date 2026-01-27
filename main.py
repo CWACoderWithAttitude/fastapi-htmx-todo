@@ -6,12 +6,14 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from uuid import uuid4
+from sqlalchemy import Column, Integer, String, Boolean
+from database import Base
+class Todo(Base):
+  __tablename__ = "todos"
 
-class Todo:
-  def __init__(self, text: str):
-    self.id = uuid4()
-    self.text = text
-    self.done = False
+  id = Column(Integer, primary_key=True, index=True)
+  text = Column(String, index=True)
+  done = Column(Boolean, default=False)
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
