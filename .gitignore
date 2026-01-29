@@ -4,3 +4,5 @@ __pycache__/
 .devcontainer/.DS_Store
 test.db
 
+test_todos.db
+__pycache__/**
