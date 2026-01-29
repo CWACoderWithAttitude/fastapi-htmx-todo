@@ -32,6 +32,12 @@ todos = []
 
 
 def get_db():
+    """
+    Create and manage database session lifecycle.
+
+    Yields:
+        Session: SQLAlchemy database session.
+    """
     try:
         db = SessionLocal()
         logger.debug("Database session created")
@@ -39,6 +45,28 @@ def get_db():
     finally:
         db.close()
         logger.debug("Database session closed")
+
+
+def create_todo_in_db(db: Session, todo_text: str) -> Todo:
+    """
+    Create a new todo item in the database.
+
+    Args:
+        db (Session): The database session to use.
+        todo_text (str): The text content of the todo item.
+
+    Returns:
+        Todo: The newly created todo object with assigned ID.
+    """
+    new_todo = Todo(todo=todo_text)
+    logger.debug(f"Creating todo object with text: '{todo_text}'")
+
+    db.add(new_todo)
+    db.commit()
+    db.refresh(new_todo)
+
+    logger.info(f"New todo created with ID: {new_todo.id}")
+    return new_todo
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -63,18 +91,26 @@ async def list_todos(request: Request, db: Session = Depends(get_db), hx_request
 
 @app.post("/todos", response_class=HTMLResponse)
 async def create_todo(request: Request, todo: Annotated[str, Form()], db: Session = Depends(get_db)):
-    # async def create_todo(request: TodoSchema, todo: Annotated[str, Form()]):
-    # my_todo = Todo()
-    new_todo = Todo(todo=todo)
+    """
+    Handle POST request to create a new todo item.
+
+    Args:
+        request (Request): The incoming HTTP request.
+        todo (str): The todo text from the form submission.
+        db (Session): Database session dependency.
+
+    Returns:
+        HTMLResponse: Rendered template with updated todos list.
+    """
+    logger.info(f"Received request to create todo: '{todo}'")
+
+    # Create the todo in the database using dedicated method
+    new_todo = create_todo_in_db(db, todo)
+
+    # Debug: Print all properties of the newly created todo
     print(
         f"new_todo properties: id={new_todo.id}, todo={new_todo.todo}, done={new_todo.done}")
-    logger.info(f"> > > Creating new todo: '{new_todo}'")
-    db.add(new_todo)
-    db.commit()
-    db.refresh(new_todo)
-    logger.info(f"New todo created with ID: {new_todo.id}")
-    # todos.append(new_todo)
-    # logger.info(f"Todo created successfully. Total todos: {len(todos)}")
+
     return templates.TemplateResponse(
         request=request, name="todos.html", context={"todos": todos}
     )

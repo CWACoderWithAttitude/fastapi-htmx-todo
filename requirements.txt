@@ -34,3 +34,6 @@ watchfiles==0.22.0
 websockets==12.0
 fastapi[all]
 sqlalchemy
+pytest
+pytest-cov
+httpx
