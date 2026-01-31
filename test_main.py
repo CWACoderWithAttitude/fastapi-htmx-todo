@@ -99,7 +99,7 @@ class TestCreateTodo:
         # Verify todo was created in database
         todos = test_db.query(Todo).all()
         assert len(todos) == 1
-        assert todos[0].todo == todo_text
+        assert todos[0].text == todo_text
         assert todos[0].done is False
 
     def test_create_todo_with_special_characters(self, client, test_db):
@@ -121,7 +121,7 @@ class TestCreateTodo:
         # Verify todo was created with exact text
         todos = test_db.query(Todo).all()
         assert len(todos) == 1
-        assert todos[0].todo == todo_text
+        assert todos[0].text == todo_text
 
     def test_create_multiple_todos(self, client, test_db):
         """
@@ -142,13 +142,13 @@ class TestCreateTodo:
         # Verify all todos were created
         todos = test_db.query(Todo).all()
         assert len(todos) == 3
-        assert [t.todo for t in todos] == todo_texts
+        assert [t.text for t in todos] == todo_texts
 
     def test_create_todo_empty_string(self, client, test_db):
         """
         Test creating a todo with empty string.
 
-        Verifies that empty todos can be created (or rejected based on business rules).
+        Verifies that empty todos are rejected (validation).
         """
         response = client.post(
             "/todos",
@@ -156,12 +156,11 @@ class TestCreateTodo:
             headers={"Content-Type": "application/x-www-form-urlencoded"}
         )
 
-        # Should accept empty string (adjust if validation is added)
-        assert response.status_code == 200
+        # Should reject empty string
+        assert response.status_code == 422
 
         todos = test_db.query(Todo).all()
-        assert len(todos) == 1
-        assert todos[0].todo == ""
+        assert len(todos) == 0
 
 
 class TestListTodos:
@@ -189,9 +188,9 @@ class TestListTodos:
         """
         # Create test todos
         todos_data = [
-            {"todo": "First task", "done": False},
-            {"todo": "Second task", "done": True},
-            {"todo": "Third task", "done": False}
+            {"text": "First task", "done": False},
+            {"text": "Second task", "done": True},
+            {"text": "Third task", "done": False}
         ]
 
         for todo_data in todos_data:
@@ -210,7 +209,7 @@ class TestListTodos:
         # Verify todo structure
         for i, todo in enumerate(json_response):
             assert "id" in todo
-            assert todo["todo"] == todos_data[i]["todo"]
+            assert todo["text"] == todos_data[i]["text"]
             assert todo["done"] == todos_data[i]["done"]
 
     def test_list_todos_htmx_response(self, client, test_db):
@@ -222,7 +221,7 @@ class TestListTodos:
         - HTMX request is properly detected
         """
         # Create a test todo
-        new_todo = Todo(todo="Test task", done=False)
+        new_todo = Todo(text="Test task", done=False)
         test_db.add(new_todo)
         test_db.commit()
 
@@ -241,7 +240,7 @@ class TestListTodos:
         todos_data = ["First", "Second", "Third"]
 
         for todo_text in todos_data:
-            new_todo = Todo(todo=todo_text, done=False)
+            new_todo = Todo(text=todo_text, done=False)
             test_db.add(new_todo)
         test_db.commit()
 
@@ -249,7 +248,7 @@ class TestListTodos:
         json_response = response.json()
 
         assert len(json_response) == 3
-        assert [t["todo"] for t in json_response] == todos_data
+        assert [t["text"] for t in json_response] == todos_data
 
     def test_list_todos_mixed_done_status(self, client, test_db):
         """
@@ -258,9 +257,9 @@ class TestListTodos:
         Verifies that both done and not-done todos are returned.
         """
         todos_data = [
-            {"todo": "Done task", "done": True},
-            {"todo": "Not done task", "done": False},
-            {"todo": "Another done", "done": True}
+            {"text": "Done task", "done": True},
+            {"text": "Not done task", "done": False},
+            {"text": "Another done", "done": True}
         ]
 
         for todo_data in todos_data:
@@ -296,17 +295,17 @@ class TestIntegration:
         client.post("/todos", data={"todo": "Task 1"})
         response = client.get("/todos")
         assert len(response.json()) == 1
-        assert response.json()[0]["todo"] == "Task 1"
+        assert response.json()[0]["text"] == "Task 1"
 
         # Create second todo
         client.post("/todos", data={"todo": "Task 2"})
         response = client.get("/todos")
         assert len(response.json()) == 2
-        assert response.json()[1]["todo"] == "Task 2"
+        assert response.json()[1]["text"] == "Task 2"
 
         # Create third todo
         client.post("/todos", data={"todo": "Task 3"})
         response = client.get("/todos")
         assert len(response.json()) == 3
-        assert [t["todo"]
+        assert [t["text"]
                 for t in response.json()] == ["Task 1", "Task 2", "Task 3"]

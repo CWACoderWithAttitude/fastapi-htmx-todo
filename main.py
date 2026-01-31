@@ -28,7 +28,6 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 logger.info("FastAPI application initialized")
 
-todos = []
 
 
 def get_db():
@@ -58,7 +57,7 @@ def create_todo_in_db(db: Session, todo_text: str) -> Todo:
     Returns:
         Todo: The newly created todo object with assigned ID.
     """
-    new_todo = Todo(todo=todo_text)
+    new_todo = Todo(text=todo_text)
     logger.debug(f"Creating todo object with text: '{todo_text}'")
 
     db.add(new_todo)
@@ -73,6 +72,7 @@ def create_todo_in_db(db: Session, todo_text: str) -> Todo:
 async def index(request: Request):
     logger.info("Index page requested")
     return templates.TemplateResponse(request=request, name="index.html")
+
 
 
 @app.get("/todos", response_class=HTMLResponse)
@@ -108,8 +108,12 @@ async def create_todo(request: Request, todo: Annotated[str, Form()], db: Sessio
     new_todo = create_todo_in_db(db, todo)
 
     # Debug: Print all properties of the newly created todo
-    print(
-        f"new_todo properties: id={new_todo.id}, todo={new_todo.todo}, done={new_todo.done}")
+    # Note: accessing .text instead of .todo to match model
+    logger.debug(
+        f"new_todo properties: id={new_todo.id}, text={new_todo.text}, done={new_todo.done}")
+
+    # Fetch updated list from DB
+    todos = db.query(Todo).all()
 
     return templates.TemplateResponse(
         request=request, name="todos.html", context={"todos": todos}
@@ -117,61 +121,64 @@ async def create_todo(request: Request, todo: Annotated[str, Form()], db: Sessio
 
 
 @app.put("/todos/{todo_id}", response_class=HTMLResponse)
-async def update_todo(request: Request, todo_id: str, text: Annotated[str, Form()]):
+async def update_todo(request: Request, todo_id: int, text: Annotated[str, Form()], db: Session = Depends(get_db)):
     logger.info(f"Updating todo {todo_id} with text: '{text}'")
-    found = False
-    for index, todo in enumerate(todos):
-        if str(todo.id) == todo_id:
-            old_text = todo.text
-            todo.text = text
-            logger.info(f"Todo {todo_id} updated: '{old_text}' -> '{text}'")
-            found = True
-            break
-
-    if not found:
+    
+    todo_item = db.query(Todo).filter(Todo.id == todo_id).first()
+    
+    if todo_item:
+        old_text = todo_item.text
+        todo_item.text = text
+        db.commit()
+        db.refresh(todo_item)
+        logger.info(f"Todo {todo_id} updated: '{old_text}' -> '{text}'")
+    else:
         logger.warning(f"Todo {todo_id} not found for update")
 
+    todos = db.query(Todo).all()
     return templates.TemplateResponse(
         request=request, name="todos.html", context={"todos": todos}
     )
 
 
 @app.post("/todos/{todo_id}/toggle", response_class=HTMLResponse)
-async def toggle_todo(request: Request, todo_id: str):
+async def toggle_todo(request: Request, todo_id: int, db: Session = Depends(get_db)):
     logger.info(f"Toggling todo {todo_id}")
-    found = False
-    for index, todo in enumerate(todos):
-        if str(todo.id) == todo_id:
-            todos[index].done = not todos[index].done
-            logger.info(
-                f"Todo {todo_id} toggled to {'done' if todos[index].done else 'not done'}")
-            found = True
-            break
+    
+    todo_item = db.query(Todo).filter(Todo.id == todo_id).first()
 
-    if not found:
+    if todo_item:
+        todo_item.done = not todo_item.done
+        db.commit()
+        db.refresh(todo_item)
+        logger.info(
+            f"Todo {todo_id} toggled to {'done' if todo_item.done else 'not done'}")
+    else:
         logger.warning(f"Todo {todo_id} not found for toggle")
 
+    todos = db.query(Todo).all()
     return templates.TemplateResponse(
         request=request, name="todos.html", context={"todos": todos}
     )
 
 
 @app.post("/todos/{todo_id}/delete", response_class=HTMLResponse)
-async def delete_todo(request: Request, todo_id: str):
+async def delete_todo(request: Request, todo_id: int, db: Session = Depends(get_db)):
     logger.info(f"Deleting todo {todo_id}")
-    found = False
-    for index, todo in enumerate(todos):
-        if str(todo.id) == todo_id:
-            deleted_text = todo.text
-            del todos[index]
-            logger.info(
-                f"Todo {todo_id} deleted: '{deleted_text}'. Remaining todos: {len(todos)}")
-            found = True
-            break
+    
+    todo_item = db.query(Todo).filter(Todo.id == todo_id).first()
 
-    if not found:
+    if todo_item:
+        deleted_text = todo_item.text
+        db.delete(todo_item)
+        db.commit()
+        logger.info(
+            f"Todo {todo_id} deleted: '{deleted_text}'")
+    else:
         logger.warning(f"Todo {todo_id} not found for deletion")
 
+    todos = db.query(Todo).all()
     return templates.TemplateResponse(
         request=request, name="todos.html", context={"todos": todos}
     )
+

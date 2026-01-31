@@ -8,5 +8,5 @@ class Todo(Base):
     __tablename__ = "todos"
 
     id = Column(Integer, primary_key=True, index=True)
-    todo = Column(String, index=True)
+    text = Column(String, index=True)
     done = Column(Boolean, default=False)
