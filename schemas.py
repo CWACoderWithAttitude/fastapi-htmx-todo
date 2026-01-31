@@ -1,10 +1,12 @@
 # schemas.py
 from pydantic import BaseModel
+
+
 class TodoSchema(BaseModel):
     id: int
-    todo: str
+    text: str
     done: bool
 
     class Config:
-        #orm_mode = True
+        # orm_mode = True
         from_attributes = True

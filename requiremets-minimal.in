@@ -1,0 +1,1 @@
+pytest fastapi sqlalchemy httpx python-multipart jinja2 watchfiles
