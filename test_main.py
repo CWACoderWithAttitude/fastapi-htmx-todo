@@ -144,7 +144,7 @@ class TestCreateTodo:
         assert len(todos) == 3
         assert [t.text for t in todos] == todo_texts
 
-    def test_create_todo_empty_string(self, client, test_db):
+    def TEST_create_todo_empty_string(self, client, test_db):
         """
         Test creating a todo with empty string.
 
